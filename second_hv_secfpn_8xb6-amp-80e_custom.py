@@ -1,4 +1,8 @@
-_base_ = 'second_hv_secfpn_8xb6-80e_kitti-3d-3class.py'
+_base_ = [
+    '../_base_/models/second_hv_secfpn_custom.py',
+    '../_base_/datasets/custom.py',
+    '../_base_/schedules/cyclic-40e.py', '../_base_/default_runtime.py'
+]
 
 # schedule settings
 optim_wrapper = dict(type='AmpOptimWrapper', loss_scale=4096.)
