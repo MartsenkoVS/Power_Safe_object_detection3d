@@ -69,10 +69,9 @@ MODEL:
         ]
 
         TARGET_ASSIGNER_CONFIG:
-            NAME: ATSS
-            TOPK: 9
+            NAME: AxisAlignedTargetAssigner
             POS_FRACTION: 0.5
-            SAMPLE_SIZE: 256
+            SAMPLE_SIZE: 512
             NORM_BY_NUM_EXAMPLES: False
             MATCH_HEIGHT: True
             BOX_CODER: ResidualCoder
