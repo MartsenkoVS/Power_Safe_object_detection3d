@@ -69,7 +69,7 @@ MODEL:
         ]
 
         TARGET_ASSIGNER_CONFIG:
-            NAME: RotatedTargetAssigner
+            NAME: ATSSTargetAssigner
             POS_FRACTION: 0.5
             SAMPLE_SIZE: 256
             NORM_BY_NUM_EXAMPLES: False
