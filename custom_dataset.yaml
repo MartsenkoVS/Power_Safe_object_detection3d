@@ -35,7 +35,7 @@ DATA_AUGMENTOR:
           DB_INFO_PATH:
               - custom_dbinfos_train.pkl
           PREPARE: {
-             filter_by_min_points: ['LEP_metal:5', 'LEP_prom:5', 'vegetation:5'],
+             filter_by_min_points: ['LEP_metal:3', 'LEP_prom:3', 'vegetation:3'],
           }
 
           SAMPLE_GROUPS: ['LEP_metal:20', 'LEP_prom:20', 'vegetation:5']
