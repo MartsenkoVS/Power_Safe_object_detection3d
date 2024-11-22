@@ -69,7 +69,8 @@ MODEL:
         ]
 
         TARGET_ASSIGNER_CONFIG:
-            NAME: ATSSTargetAssigner
+            NAME: ATSS
+            TOPK: 9
             POS_FRACTION: 0.5
             SAMPLE_SIZE: 256
             NORM_BY_NUM_EXAMPLES: False
