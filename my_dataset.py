@@ -46,17 +46,21 @@ class MyDataset(Det3DDataset):
         data_list = mmengine.load(self.ann_file)
         self.data_list = data_list
         print(f"Загружено {len(self.data_list)} элементов в data_list")
+        if len(self.data_list) > 0:
+            print(f"Первый элемент в data_list: {self.data_list[0]}")
         return data_list
+
 
     def get_data_info(self, index):
         """Получает и обрабатывает информацию о данных по индексу."""
         print(f"Доступ к индексу: {index}")
-        if index >= len(self.data_list) or index < 0:
-            print(f"Индекс {index} выходит за рамки. Длина списка данных: {len(self.data_list)}")
+        if index >= len(self.data_list) или index < 0:
+            print(f"Индекс {index} выходит за пределы. Длина data_list: {len(self.data_list)}")
             raise IndexError(f"Индекс {index} выходит за границы для data_list длиной {len(self.data_list)}")
         info = self.data_list[index]
         data_info = self.parse_data_info(info)
         return data_info
+
 
     def parse_data_info(self, info):
         """Processes raw data information."""
@@ -68,9 +72,14 @@ class MyDataset(Det3DDataset):
         return data_info
 
     def parse_ann_info(self, info):
-        """Processes annotations and returns ann_info."""
+        """Обрабатывает аннотации и возвращает ann_info."""
         annos = info.get('annos', None)
-        if annos is None or len(annos['name']) == 0:
+        if annos is None:
+            print("Нет ключа 'annos' в информации о данных.")
+        else:
+            print(f"Ключи аннотаций: {annos.keys()}")
+    
+        if annos is None or len(annos.get('name', [])) == 0:
             ann_info = dict()
             ann_info['gt_bboxes_3d'] = np.zeros((0, 7), dtype=np.float32)
             ann_info['gt_labels_3d'] = np.zeros((0,), dtype=np.int64)
@@ -80,20 +89,41 @@ class MyDataset(Det3DDataset):
             locs = np.array(annos['location'])    # x, y, z
             rots = np.array(annos['rotation_y'])  # yaw
 
-            # Form gt_bboxes_3d
+            print(f"Обработка {len(names)} аннотаций.")
+
+            try:
+                gt_labels_3d = np.array(
+                    [self.metainfo['classes'].index(n) for n in names], dtype=np.int64)
+            except ValueError as e:
+                print(f"Ошибка при индексации меток: {e}")
+                gt_labels_3d = np.zeros((0,), dtype=np.int64)
+
+            # Проверка размеров массивов
+            if dims.ndim == 1:
+                dims = dims.reshape(1, -1)
+            if locs.ndim == 1:
+                locs = locs.reshape(1, -1)
+            if rots.ndim == 1:
+                rots = rots.reshape(1, -1)
+
             gt_bboxes_3d = np.concatenate([locs, dims, rots[:, np.newaxis]], axis=1)
-            gt_labels_3d = np.array(
-                [self.metainfo['classes'].index(n) for n in names], dtype=np.int64)
             ann_info = dict(
                 gt_bboxes_3d=gt_bboxes_3d,
                 gt_labels_3d=gt_labels_3d,
             )
-            # Update instance counts
+            # Обновление счётчиков экземпляров
             for label in gt_labels_3d:
-                self.num_ins_per_cat[label] += 1
+                if 0 <= label < len(self.num_ins_per_cat):
+                    self.num_ins_per_cat[label] += 1
+                else:
+                    print(f"Некорректная метка {label} для классов {self.metainfo['classes']}")
 
-        # Convert gt_bboxes_3d to LiDARInstance3DBoxes
-        gt_bboxes_3d = LiDARInstance3DBoxes(ann_info['gt_bboxes_3d'])
-        ann_info['gt_bboxes_3d'] = gt_bboxes_3d
+        # Преобразуем gt_bboxes_3d в LiDARInstance3DBoxes
+        if 'gt_bboxes_3d' in ann_info:
+            gt_bboxes_3d = LiDARInstance3DBoxes(ann_info['gt_bboxes_3d'])
+            ann_info['gt_bboxes_3d'] = gt_bboxes_3d
+        else:
+            ann_info['gt_bboxes_3d'] = LiDARInstance3DBoxes(np.zeros((0, 7), dtype=np.float32))
 
         return ann_info
+
