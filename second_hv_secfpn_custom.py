@@ -92,3 +92,5 @@ model = dict(
         min_bbox_size=0,
         nms_pre=100,
         max_num=115))
+
+load_from = '/kaggle/working//second_kitti.pth'
