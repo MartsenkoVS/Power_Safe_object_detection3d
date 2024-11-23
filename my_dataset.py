@@ -34,16 +34,18 @@ class MyDataset(Det3DDataset):
 
     def load_data_list(self):
         """Загружает список данных из файла аннотаций."""
-        data_list = mmengine.load(osp.join(self.data_root, self.ann_file))
+        print(f"Загрузка данных из: {self.ann_file}")
+        data_list = mmengine.load(self.ann_file)
         return data_list
 
     def parse_data_info(self, info):
         """Обрабатывает исходную информацию о данных."""
         data_info = dict()
         data_info['sample_idx'] = info.get('sample_idx', None)
-        data_info['pts_filename'] = osp.join(self.data_root, info['point_cloud']['point_cloud_path'])
+        data_info['pts_filename'] = osp.join(self.data_prefix.get('pts', ''), info['point_cloud']['point_cloud_path'])
         data_info['ann_info'] = self.parse_ann_info(info)
         return data_info
+
 
     def parse_ann_info(self, info):
         """Обрабатывает аннотации и возвращает ann_info."""
