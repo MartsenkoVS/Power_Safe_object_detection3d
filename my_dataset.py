@@ -46,6 +46,7 @@ class MyDataset(Det3DDataset):
 
     def get_data_info(self, index):
         """Gets and processes data information by index."""
+        print(index)
         info = self.data_list[index]
         data_info = self.parse_data_info(info)
         return data_info
