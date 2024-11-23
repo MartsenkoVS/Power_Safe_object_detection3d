@@ -51,7 +51,7 @@ class MyDataset(Det3DDataset):
     def get_data_info(self, index):
         """Получает и обрабатывает информацию о данных по индексу."""
         print(f"Доступ к индексу: {index}")
-        if index >= len(self.data_list) или index < 0:
+        if index >= len(self.data_list) or index < 0:
             print(f"Индекс {index} выходит за рамки. Длина списка данных: {len(self.data_list)}")
             raise IndexError(f"Индекс {index} выходит за границы для data_list длиной {len(self.data_list)}")
         info = self.data_list[index]
