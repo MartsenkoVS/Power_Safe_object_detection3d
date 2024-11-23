@@ -18,7 +18,7 @@ class MyDataset(Det3DDataset):
                  modality=None,
                  default_cam_key='CAM2',
                  box_type_3d='LiDAR',
-                 filter_empty_gt=True,
+                 filter_empty_gt=True,  # Временно установите на False для отладки
                  test_mode=False,
                  metainfo=None,
                  **kwargs):
@@ -36,31 +36,28 @@ class MyDataset(Det3DDataset):
             metainfo=metainfo,
             **kwargs)
         self.num_ins_per_cat = [0] * len(self.metainfo['classes'])
-
-    def __len__(self):
-        return len(self.data_list)
+        print(f"metainfo: {self.metainfo}")
 
     def load_data_list(self):
-        """Загружает список данных из файла аннотаций."""
-        print(f"Загрузка данных из: {self.ann_file}")
+        """Loads the list of data from the annotation file."""
+        print(f"Loading data from: {self.ann_file}")
         data_list = mmengine.load(self.ann_file)
-        self.data_list = data_list
-        print(f"Загружено {len(self.data_list)} элементов в data_list")
+        self.data_list = data_list  # Ensure data_list is assigned to self.data_list
+        print(f"Loaded {len(self.data_list)} items in data_list")
         if len(self.data_list) > 0:
             print(f"Первый элемент в data_list: {self.data_list[0]}")
         return data_list
 
-
     def get_data_info(self, index):
-        """Получает и обрабатывает информацию о данных по индексу."""
+        """Gets and processes data information by index."""
         print(f"Доступ к индексу: {index}")
         if index >= len(self.data_list) or index < 0:
             print(f"Индекс {index} выходит за пределы. Длина data_list: {len(self.data_list)}")
             raise IndexError(f"Индекс {index} выходит за границы для data_list длиной {len(self.data_list)}")
         info = self.data_list[index]
         data_info = self.parse_data_info(info)
+        print(f"Processed ann_info for index {index}")
         return data_info
-
 
     def parse_data_info(self, info):
         """Processes raw data information."""
@@ -72,17 +69,19 @@ class MyDataset(Det3DDataset):
         return data_info
 
     def parse_ann_info(self, info):
-        """Обрабатывает аннотации и возвращает ann_info."""
+        """Processes annotations and returns ann_info."""
+        print("Вызов parse_ann_info")
         annos = info.get('annos', None)
         if annos is None:
             print("Нет ключа 'annos' в информации о данных.")
         else:
             print(f"Ключи аннотаций: {annos.keys()}")
-    
-        if annos is None or len(annos.get('name', [])) == 0:
+
+        if annos is None или len(annos.get('name', [])) == 0:
             ann_info = dict()
             ann_info['gt_bboxes_3d'] = np.zeros((0, 7), dtype=np.float32)
             ann_info['gt_labels_3d'] = np.zeros((0,), dtype=np.int64)
+            print("Аннотации пусты.")
         else:
             names = annos['name']
             dims = np.array(annos['dimensions'])  # l, w, h
@@ -94,6 +93,7 @@ class MyDataset(Det3DDataset):
             try:
                 gt_labels_3d = np.array(
                     [self.metainfo['classes'].index(n) for n in names], dtype=np.int64)
+                print(f"gt_labels_3d: {gt_labels_3d}")
             except ValueError as e:
                 print(f"Ошибка при индексации меток: {e}")
                 gt_labels_3d = np.zeros((0,), dtype=np.int64)
@@ -118,6 +118,8 @@ class MyDataset(Det3DDataset):
                 else:
                     print(f"Некорректная метка {label} для классов {self.metainfo['classes']}")
 
+            print(f"Текущие счётчики экземпляров: {self.num_ins_per_cat}")
+
         # Преобразуем gt_bboxes_3d в LiDARInstance3DBoxes
         if 'gt_bboxes_3d' in ann_info:
             gt_bboxes_3d = LiDARInstance3DBoxes(ann_info['gt_bboxes_3d'])
@@ -126,4 +128,3 @@ class MyDataset(Det3DDataset):
             ann_info['gt_bboxes_3d'] = LiDARInstance3DBoxes(np.zeros((0, 7), dtype=np.float32))
 
         return ann_info
-
