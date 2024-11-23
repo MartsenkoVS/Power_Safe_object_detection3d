@@ -8,15 +8,10 @@ import mmengine
 @DATASETS.register_module()
 class MyDataset(Det3DDataset):
 
-    METAINFO = {
-        'classes': ('LEP_metal', 'LEP_prom', 'vegetation')
-    }
-
     def __init__(self,
                  data_root,
                  ann_file,
                  pipeline=None,
-                 classes=None,
                  modality=None,
                  default_cam_key='CAM2',
                  box_type_3d='LiDAR',
@@ -27,7 +22,6 @@ class MyDataset(Det3DDataset):
             data_root=data_root,
             ann_file=ann_file,
             pipeline=pipeline,
-            classes=classes,
             modality=modality,
             default_cam_key=default_cam_key,
             box_type_3d=box_type_3d,
@@ -35,6 +29,7 @@ class MyDataset(Det3DDataset):
             test_mode=test_mode,
             **kwargs)
         self.data_root = data_root
+        self.metainfo = dict(classes=('LEP_metal', 'LEP_prom', 'vegetation'))
 
     def load_data_list(self):
         """Загружает список данных из файла аннотаций."""
@@ -43,24 +38,19 @@ class MyDataset(Det3DDataset):
 
     def parse_data_info(self, info):
         """Обрабатывает исходную информацию о данных."""
-        # Предполагается, что info - это один элемент из data_list
-        # Здесь вы можете добавить обработку, если необходимо
         data_info = dict()
         data_info['sample_idx'] = info.get('sample_idx', None)
         data_info['pts_filename'] = osp.join(self.data_root, info['point_cloud']['point_cloud_path'])
         data_info['ann_info'] = self.parse_ann_info(info)
-        data_info['lidar2cam'] = info.get('lidar2cam', None)
-        data_info['cam_intrinsic'] = info.get('cam_intrinsic', None)
         return data_info
 
     def parse_ann_info(self, info):
         """Обрабатывает аннотации и возвращает ann_info."""
         annos = info.get('annos', None)
         if annos is None or len(annos['name']) == 0:
-            # Нет аннотаций для этого образца
             ann_info = dict()
             ann_info['gt_bboxes_3d'] = np.zeros((0, 7), dtype=np.float32)
-            ann_info['gt_labels_3d'] = np.zeros((0, ), dtype=np.int64)
+            ann_info['gt_labels_3d'] = np.zeros((0,), dtype=np.int64)
         else:
             names = annos['name']
             dims = np.array(annos['dimensions'])  # l, w, h
