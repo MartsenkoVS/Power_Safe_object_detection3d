@@ -31,7 +31,6 @@ class MyDataset(Det3DDataset):
             filter_empty_gt=filter_empty_gt,
             test_mode=test_mode,
             **kwargs)
-        self.data_root = data_root
 
     def load_data_list(self):
         """Загружает список данных из файла аннотаций."""
