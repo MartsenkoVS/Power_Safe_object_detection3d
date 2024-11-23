@@ -1,11 +1,12 @@
 from mmdet3d.registry import DATASETS
-from mmdet3d.datasets import Custom3DDataset
+from mmdet3d.datasets.det3d_dataset import Det3DDataset
 from mmdet3d.structures import LiDARInstance3DBoxes
 import numpy as np
 import os.path as osp
+import mmengine
 
 @DATASETS.register_module()
-class MyDataset(Custom3DDataset):
+class MyDataset(Det3DDataset):
 
     METAINFO = {
         'classes': ('LEP_metal', 'LEP_prom', 'vegetation')
@@ -17,16 +18,22 @@ class MyDataset(Custom3DDataset):
                  pipeline=None,
                  classes=None,
                  modality=None,
+                 default_cam_key='CAM2',
+                 box_type_3d='LiDAR',
                  filter_empty_gt=True,
-                 test_mode=False):
+                 test_mode=False,
+                 **kwargs):
         super().__init__(
             data_root=data_root,
             ann_file=ann_file,
             pipeline=pipeline,
             classes=classes,
             modality=modality,
+            default_cam_key=default_cam_key,
+            box_type_3d=box_type_3d,
             filter_empty_gt=filter_empty_gt,
-            test_mode=test_mode)
+            test_mode=test_mode,
+            **kwargs)
         self.data_root = data_root
 
     def load_data_list(self):
@@ -34,31 +41,43 @@ class MyDataset(Custom3DDataset):
         data_list = mmengine.load(osp.join(self.data_root, self.ann_file))
         return data_list
 
-    def get_data_info(self, index):
-        info = self.data_list[index]
-        input_dict = dict(
-            sample_idx=index,
-            pts_filename=osp.join(self.data_root, info['point_cloud']['point_cloud_path']),
-            timestamp=info.get('timestamp', 0),
-        )
-        return input_dict
+    def parse_data_info(self, info):
+        """Обрабатывает исходную информацию о данных."""
+        # Предполагается, что info - это один элемент из data_list
+        # Здесь вы можете добавить обработку, если необходимо
+        data_info = dict()
+        data_info['sample_idx'] = info.get('sample_idx', None)
+        data_info['pts_filename'] = osp.join(self.data_root, info['point_cloud']['point_cloud_path'])
+        data_info['ann_info'] = self.parse_ann_info(info)
+        data_info['lidar2cam'] = info.get('lidar2cam', None)
+        data_info['cam_intrinsic'] = info.get('cam_intrinsic', None)
+        return data_info
 
-    def get_ann_info(self, index):
-        info = self.data_list[index]
+    def parse_ann_info(self, info):
+        """Обрабатывает аннотации и возвращает ann_info."""
         annos = info.get('annos', None)
         if annos is None or len(annos['name']) == 0:
-            gt_bboxes_3d = np.zeros((0, 7), dtype=np.float32)
-            gt_labels_3d = np.zeros((0, ), dtype=np.int64)
+            # Нет аннотаций для этого образца
+            ann_info = dict()
+            ann_info['gt_bboxes_3d'] = np.zeros((0, 7), dtype=np.float32)
+            ann_info['gt_labels_3d'] = np.zeros((0, ), dtype=np.int64)
         else:
             names = annos['name']
-            dims = np.array(annos['dimensions'])
-            locs = np.array(annos['location'])
-            rots = np.array(annos['rotation_y'])
+            dims = np.array(annos['dimensions'])  # l, w, h
+            locs = np.array(annos['location'])    # x, y, z
+            rots = np.array(annos['rotation_y'])  # yaw
+
+            # Формируем gt_bboxes_3d
             gt_bboxes_3d = np.concatenate([locs, dims, rots[:, np.newaxis]], axis=1)
-            gt_labels_3d = np.array([self.metainfo['classes'].index(n) for n in names], dtype=np.int64)
-        gt_bboxes_3d = LiDARInstance3DBoxes(gt_bboxes_3d)
-        anns_results = dict(
-            gt_bboxes_3d=gt_bboxes_3d,
-            gt_labels_3d=gt_labels_3d,
-        )
-        return anns_results
+            gt_labels_3d = np.array(
+                [self.metainfo['classes'].index(n) for n in names], dtype=np.int64)
+            ann_info = dict(
+                gt_bboxes_3d=gt_bboxes_3d,
+                gt_labels_3d=gt_labels_3d,
+            )
+
+        # Преобразуем gt_bboxes_3d в LiDARInstance3DBoxes
+        gt_bboxes_3d = LiDARInstance3DBoxes(ann_info['gt_bboxes_3d'])
+        ann_info['gt_bboxes_3d'] = gt_bboxes_3d
+
+        return ann_info
