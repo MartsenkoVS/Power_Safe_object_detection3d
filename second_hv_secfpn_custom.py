@@ -84,4 +84,4 @@ model = dict(
         allowed_border=0,
         pos_weight=-1,
         debug=False),
-    test_cfg = None
+    test_cfg = None)
