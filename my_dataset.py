@@ -7,6 +7,9 @@ import mmengine
 
 @DATASETS.register_module()
 class MyDataset(Det3DDataset):
+    METAINFO = {
+        'classes': ('LEP_metal', 'LEP_prom', 'vegetation')
+    }
 
     def __init__(self,
                  data_root,
@@ -29,7 +32,6 @@ class MyDataset(Det3DDataset):
             test_mode=test_mode,
             **kwargs)
         self.data_root = data_root
-        self.metainfo = dict(classes=('LEP_metal', 'LEP_prom', 'vegetation'))
 
     def load_data_list(self):
         """Загружает список данных из файла аннотаций."""
