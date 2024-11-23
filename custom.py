@@ -81,25 +81,6 @@ val_dataloader = dict(
         test_mode=True,
         metainfo=metainfo,
         box_type_3d='LiDAR'))
-test_dataloader = dict(
-    batch_size=1,
-    num_workers=1,
-    persistent_workers=True,
-    drop_last=False,
-    sampler=dict(type='DefaultSampler', shuffle=False),
-    dataset=dict(
-        type=dataset_type,
-        data_root=data_root,
-        data_prefix=dict(pts='points'),
-        ann_file='custom_infos_val.pkl',  # specify your validation pkl info
-        pipeline=test_pipeline,
-        modality=input_modality,
-        test_mode=True,
-        metainfo=metainfo,
-        box_type_3d='LiDAR'))
-test_evaluator = dict(
-    type='Det3DEvaluator',
-    metrics=['mAP']
 )
 val_evaluator = dict(
     type='KittiMetric',
