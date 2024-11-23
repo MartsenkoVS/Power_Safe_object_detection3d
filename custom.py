@@ -1,4 +1,4 @@
-from my_dataset_module import MyDataset
+from my_dataset import MyDataset
 # dataset settings
 dataset_type = 'MyDataset'
 data_root = 'data/custom/'
