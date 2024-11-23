@@ -1,7 +1,4 @@
 # dataset settings
-custom_imports = dict(
-    imports=['mydataset'],  # Название файла без расширения .py
-    allow_failed_imports=False)
 dataset_type = 'MyDataset'
 data_root = 'data/custom/'
 class_names = ['LEP_metal', 'LEP_prom', 'vegetation'] # replace with your dataset class
