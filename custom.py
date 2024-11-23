@@ -81,6 +81,11 @@ val_dataloader = dict(
         test_mode=True,
         metainfo=metainfo,
         box_type_3d='LiDAR'))
+test_dataloader = val_dataloader
+test_evaluator = dict(
+    type='Det3DEvaluator',
+    metrics=['mAP']
+)
 val_evaluator = dict(
     type='KittiMetric',
     ann_file=data_root + 'custom_infos_val.pkl',  # specify your validation pkl info
