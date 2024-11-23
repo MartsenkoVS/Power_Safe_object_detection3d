@@ -41,15 +41,19 @@ class MyDataset(Det3DDataset):
         return len(self.data_list)
 
     def load_data_list(self):
-        """Loads the list of data from the annotation file."""
-        print(f"Loading data from: {self.ann_file}")
+        """Загружает список данных из файла аннотаций."""
+        print(f"Загрузка данных из: {self.ann_file}")
         data_list = mmengine.load(self.ann_file)
-        self.data_list = data_list  # Ensure data_list is assigned to self.data_list
+        self.data_list = data_list
+        print(f"Загружено {len(self.data_list)} элементов в data_list")
         return data_list
 
     def get_data_info(self, index):
-        """Gets and processes data information by index."""
-        print(index)
+        """Получает и обрабатывает информацию о данных по индексу."""
+        print(f"Доступ к индексу: {index}")
+        if index >= len(self.data_list) или index < 0:
+            print(f"Индекс {index} выходит за рамки. Длина списка данных: {len(self.data_list)}")
+            raise IndexError(f"Индекс {index} выходит за границы для data_list длиной {len(self.data_list)}")
         info = self.data_list[index]
         data_info = self.parse_data_info(info)
         return data_info
