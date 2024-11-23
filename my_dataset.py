@@ -37,6 +37,9 @@ class MyDataset(Det3DDataset):
             **kwargs)
         self.num_ins_per_cat = [0] * len(self.metainfo['classes'])
 
+    def __len__(self):
+        return len(self.data_list)
+
     def load_data_list(self):
         """Loads the list of data from the annotation file."""
         print(f"Loading data from: {self.ann_file}")
