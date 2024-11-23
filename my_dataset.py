@@ -77,7 +77,7 @@ class MyDataset(Det3DDataset):
         else:
             print(f"Ключи аннотаций: {annos.keys()}")
 
-        if annos is None или len(annos.get('name', [])) == 0:
+        if annos is None or len(annos.get('name', [])) == 0:
             ann_info = dict()
             ann_info['gt_bboxes_3d'] = np.zeros((0, 7), dtype=np.float32)
             ann_info['gt_labels_3d'] = np.zeros((0,), dtype=np.int64)
