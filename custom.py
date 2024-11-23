@@ -53,18 +53,16 @@ train_dataloader = dict(
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
-        type='RepeatDataset',
-        times=2,
-        dataset=dict(
-            type=dataset_type,
-            data_root=data_root,
-            ann_file='custom_infos_train.pkl',  # specify your training pkl info
-            data_prefix=dict(pts='points'),
-            pipeline=train_pipeline,
-            modality=input_modality,
-            test_mode=False,
-            metainfo=metainfo,
-            box_type_3d='LiDAR')))
+        type=dataset_type,
+        data_root=data_root,
+        ann_file='custom_infos_train.pkl',
+        data_prefix=dict(pts='points'),
+        pipeline=train_pipeline,
+        modality=input_modality,
+        test_mode=False,
+        metainfo=metainfo,
+        box_type_3d='LiDAR')
+)
 val_dataloader = dict(
     batch_size=1,
     num_workers=1,
