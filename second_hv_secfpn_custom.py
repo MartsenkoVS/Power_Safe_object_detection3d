@@ -83,14 +83,6 @@ model = dict(
         ],
         allowed_border=0,
         pos_weight=-1,
-        debug=False),
-    test_cfg=dict(
-        use_rotate_nms=True,
-        nms_across_levels=False,
-        nms_thr=0.01,
-        score_thr=0.1,
-        min_bbox_size=0,
-        nms_pre=100,
-        max_num=115))
+        debug=False)
 
 load_from = '/kaggle/working//second_kitti.pth'
