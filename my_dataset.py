@@ -21,7 +21,6 @@ class MyDataset(Det3DDataset):
                  filter_empty_gt=True,
                  test_mode=False,
                  **kwargs):
-        self.num_ins_per_cat = [0] * len(self.metainfo['classes'])
         super().__init__(
             data_root=data_root,
             ann_file=ann_file,
