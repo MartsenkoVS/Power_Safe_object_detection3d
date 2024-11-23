@@ -83,6 +83,6 @@ model = dict(
         ],
         allowed_border=0,
         pos_weight=-1,
-        debug=False)
+        debug=False))
 
 load_from = '/kaggle/working//second_kitti.pth'
