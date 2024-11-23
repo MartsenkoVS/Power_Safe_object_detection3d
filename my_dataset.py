@@ -38,6 +38,12 @@ class MyDataset(Det3DDataset):
         data_list = mmengine.load(self.ann_file)
         return data_list
 
+    def get_data_info(self, index):
+        """Получает информацию о данных по заданному индексу и обрабатывает её."""
+        info = self.data_list[index]
+        data_info = self.parse_data_info(info)
+        return data_info
+
     def parse_data_info(self, info):
         """Обрабатывает исходную информацию о данных."""
         data_info = dict()
@@ -45,7 +51,6 @@ class MyDataset(Det3DDataset):
         data_info['pts_filename'] = osp.join(self.data_prefix.get('pts', ''), info['point_cloud']['point_cloud_path'])
         data_info['ann_info'] = self.parse_ann_info(info)
         return data_info
-
 
     def parse_ann_info(self, info):
         """Обрабатывает аннотации и возвращает ann_info."""
