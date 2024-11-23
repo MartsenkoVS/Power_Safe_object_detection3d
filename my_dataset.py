@@ -36,7 +36,12 @@ class MyDataset(Det3DDataset):
         """Загружает список данных из файла аннотаций."""
         print(f"Загрузка данных из: {self.ann_file}")
         data_list = mmengine.load(self.ann_file)
+        print(f"Загружено {len(data_list)} элементов в data_list.")
+        self.data_list = data_list
         return data_list
+        
+    def __len__(self):
+        return len(self.data_list)
 
     def get_data_info(self, index):
         """Получает информацию о данных по заданному индексу и обрабатывает её."""
@@ -73,9 +78,14 @@ class MyDataset(Det3DDataset):
                 gt_bboxes_3d=gt_bboxes_3d,
                 gt_labels_3d=gt_labels_3d,
             )
+            # Обновляем счётчики экземпляров
+            for label in gt_labels_3d:
+                self.num_ins_per_cat[label] += 1
+            print(f"Обработано {len(gt_labels_3d)} аннотаций.")
 
         # Преобразуем gt_bboxes_3d в LiDARInstance3DBoxes
         gt_bboxes_3d = LiDARInstance3DBoxes(ann_info['gt_bboxes_3d'])
         ann_info['gt_bboxes_3d'] = gt_bboxes_3d
 
         return ann_info
+
