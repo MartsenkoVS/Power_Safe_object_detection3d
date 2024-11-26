@@ -5,7 +5,7 @@ import os.path as osp
 import mmengine
 
 @DATASETS.register_module()
-class MyCustomDataset(Det3DDataset):
+class MyDataset(Det3DDataset):
     METAINFO = {
         'classes': ('LEP_prom', 'LEP_metal', 'vegetation'),
     }
