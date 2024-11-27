@@ -12,11 +12,10 @@ train_pipeline = [
         coord_type='LIDAR',
         load_dim=4,  # замените на вашу размерность данных
         use_dim=4),  # замените на вашу используемую размерность
-    # Удалите или закомментируйте следующий шаг
-    # dict(
-    #     type='LoadAnnotations3D',
-    #     with_bbox_3d=True,
-    #     with_label_3d=True),
+    dict(
+        type='LoadAnnotations3D',
+        with_bbox_3d=True,
+        with_label_3d=True),
     dict(
         type='ObjectNoise',
         num_try=100,
