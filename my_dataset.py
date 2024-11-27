@@ -27,28 +27,41 @@ class MyDataset(Det3DDataset):
             pipeline=pipeline,
             modality=modality,
             default_cam_key=default_cam_key,
+            load_type=load_type,
             box_type_3d=box_type_3d,
             filter_empty_gt=filter_empty_gt,
             test_mode=test_mode,
             **kwargs)
+        # Дополнительная инициализация, если необходимо
 
     def load_data_list(self):
         """
-        Загружает список данных и добавляет `sample_id` при необходимости.
+        Загружает список данных из файла аннотаций и обновляет `sample_id`, если его нет.
         """
         data_dict = mmengine.load(self.ann_file)
-        data_list = data_dict['data_list']
+        
+        # Проверяем, что файл содержит необходимые ключи
+        if 'metainfo' not in data_dict or 'data_list' not in data_dict:
+            raise ValueError("Файл аннотаций должен содержать ключи 'metainfo' и 'data_list'")
+        
         metainfo = data_dict['metainfo']
-        self.metainfo = metainfo  # Обновляем метаинформацию
+        raw_data_list = data_dict['data_list']
+
+        # Обновляем метаинформацию через внутренний атрибут
+        self._metainfo = self._load_metainfo(metainfo)
+
+        data_list = raw_data_list
 
         for idx, data_info in enumerate(data_list):
-            # Проверка наличия `sample_id`
+            # Генерация sample_id, если его нет
             if 'sample_id' not in data_info:
                 point_cloud_path = data_info['point_cloud']['point_cloud_path']
                 filename = osp.basename(point_cloud_path)
                 sample_id = osp.splitext(filename)[0]
                 data_info['sample_id'] = sample_id
-            # Дополнительные проверки можно добавить здесь
+            # Дополнительные проверки и обработки можно добавить здесь
+            print(f"Обработано образец {idx}: sample_id={data_info['sample_id']}")
+        
         return data_list
 
     def parse_data_info(self, info):
